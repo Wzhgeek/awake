@@ -61,14 +61,12 @@ class WakeWordDetector:
         self.audio_stream = None
         self.pa = None
         
-        # Porcupine访问密钥 - 从环境变量或默认值获取
-        self.access_key = 'SvijjCX/afSPA0vXc2gd2LfkdthWcOy1N+FS/qB52gj2evS0rEuHvw=='
+        # Porcupine访问密钥
+        self.access_key = 'YFQbRTufWcMpXnZ2vpiIQFjnG2Ul3vCntVxambYszRDFh2mmjCH0ZQ=='
         
         # 自动检测可用的关键词模型文件
         possible_model_names = [
             "迈灵迈灵_zh_windows_v3_0_0.ppn",  # Windows版本
-            # "迈灵迈灵_zh_linux_v3_0_0.ppn",    # Linux版本
-            "迈灵迈灵_zh_mac_v3_0_0.ppn",      # Mac版本
         ]
         
         model_path = None
@@ -79,8 +77,11 @@ class WakeWordDetector:
                 break
         
         if not model_path:
-            # 如果没有找到任何模型文件，使用默认的
-            model_path = resource_path("迈灵迈灵_zh_linux_v3_0_0.ppn")
+            safe_print("❌ 未找到任何可用的唤醒词模型文件!")
+            safe_print("💡 请确保以下文件之一存在:")
+            for name in possible_model_names:
+                safe_print(f"   - {name}")
+            sys.exit(1)
         
         # 自定义关键词模型配置
         self.keywords_config = [
@@ -130,19 +131,33 @@ class WakeWordDetector:
                     self.keywords_config = [config for config in self.keywords_config 
                                           if os.path.exists(config["model_path"])]
             
-            # 使用中文模型文件和关键词文件创建Porcupine实例
-            self.porcupine = pvporcupine.create(
-                access_key=self.access_key,
-                keyword_paths=keyword_paths,
-                model_path=self.zh_model_path
-            )
-            
-            safe_print(f"✅ Porcupine初始化成功!")
-            safe_print(f"📱 支持的唤醒词: {', '.join([config['name'] for config in self.keywords_config])}")
-            safe_print(f"🎵 采样率: {self.porcupine.sample_rate} Hz")
-            safe_print(f"🎚️ 帧长度: {self.porcupine.frame_length}")
-            safe_print(f"🌏 使用语言模型: {self.zh_model_path}")
-            return True
+            try:
+                # 使用中文模型文件和关键词文件创建Porcupine实例
+                self.porcupine = pvporcupine.create(
+                    access_key=self.access_key,
+                    keyword_paths=keyword_paths,
+                    model_path=self.zh_model_path
+                )
+                
+                safe_print(f"✅ Porcupine初始化成功!")
+                safe_print(f"📱 支持的唤醒词: {', '.join([config['name'] for config in self.keywords_config])}")
+                safe_print(f"🎵 采样率: {self.porcupine.sample_rate} Hz")
+                safe_print(f"🎚️ 帧长度: {self.porcupine.frame_length}")
+                safe_print(f"🌏 使用语言模型: {self.zh_model_path}")
+                return True
+            except pvporcupine.PorcupineInvalidArgumentError as e:
+                safe_print(f"❌ Porcupine参数错误: {e}")
+                safe_print("💡 请检查访问密钥是否有效")
+                return False
+            except pvporcupine.PorcupineActivationError as e:
+                safe_print(f"❌ Porcupine激活错误: {e}")
+                safe_print("💡 请检查访问密钥是否有效且未过期")
+                return False
+            except Exception as e:
+                safe_print(f"❌ Porcupine初始化失败: {e}")
+                safe_print("💡 请确保访问密钥正确且所有模型文件都存在")
+                return False
+                
         except Exception as e:
             safe_print(f"❌ Porcupine初始化失败: {e}")
             safe_print("💡 请确保访问密钥正确且所有模型文件都存在")
