@@ -8,6 +8,12 @@ on:
     branches: [ main ]
   workflow_dispatch:
 
+# 添加权限配置
+permissions:
+  contents: write
+  discussions: write
+  pull-requests: write
+
 jobs:
   build:
     runs-on: ${{ matrix.os }}
@@ -21,6 +27,8 @@ jobs:
     steps:
     - name: 检出代码
       uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
 
     - name: 设置Python环境
       uses: actions/setup-python@v4
@@ -41,6 +49,20 @@ jobs:
       run: |
         python -m pip install --upgrade pip
         pip install -r requirements.txt
+
+    - name: 准备模型文件
+      shell: cmd
+      run: |
+        echo "Checking model files..."
+        if not exist "porcupine_params_zh.pv" (
+          echo "Error: Chinese language model file not found!"
+          exit 1
+        )
+        if not exist "迈灵迈灵_zh_windows_v3_0_0.ppn" (
+          echo "Error: Windows wake word model file not found!"
+          exit 1
+        )
+        echo "Model files are ready."
 
     - name: 构建可执行文件
       shell: cmd
@@ -71,7 +93,10 @@ jobs:
   release:
     needs: build
     runs-on: ubuntu-latest
+    # 确保在main分支或标签时运行
     if: github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/v')
+    permissions:
+      contents: write  # 添加发布权限
     
     steps:
     - name: 检出代码
