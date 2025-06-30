@@ -1,35 +1,33 @@
 # -*- mode: python ; coding: utf-8 -*-
 """
-PyInstaller配置文件 - 离线唤醒词检测系统
+PyInstaller configuration file - Offline Wake Word Detection System
 """
 
 import sys
 import os
 from PyInstaller.utils.hooks import collect_data_files
 
-# 收集pvporcupine的数据文件
+# Collect pvporcupine data files
 porcupine_datas = collect_data_files('pvporcupine')
 
-# 添加模型文件
+# Add model files
 datas = []
 datas.extend(porcupine_datas)
 
-# 添加中文语言模型（必需）
+# Add Chinese language model (required)
 if os.path.exists('porcupine_params_zh.pv'):
     datas.append(('porcupine_params_zh.pv', '.'))
-    print("添加中文语言模型: porcupine_params_zh.pv")
+    print("[INFO] Adding Chinese language model: porcupine_params_zh.pv")
 
-# 唤醒词模型文件（检查所有可能的平台版本）
+# Wake word model files (check all possible platform versions)
 model_files = [
-    '迈灵迈灵_zh_windows_v3_0_0.ppn',  # Windows版本
-    '迈灵迈灵_zh_linux_v3_0_0.ppn',    # Linux版本
-    '迈灵迈灵_zh_mac_v3_0_0.ppn',      # Mac版本
+    '迈灵迈灵_zh_windows_v3_0_0.ppn',  # Windows version
 ]
 
 for model_file in model_files:
     if os.path.exists(model_file):
         datas.append((model_file, '.'))
-        print(f"添加模型文件: {model_file}")
+        print(f"[INFO] Adding wake word model: {model_file}")
 
 block_cipher = None
 

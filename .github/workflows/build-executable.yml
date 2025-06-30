@@ -43,7 +43,13 @@ jobs:
         pip install -r requirements.txt
 
     - name: 构建可执行文件
+      shell: cmd
+      env:
+        PYTHONIOENCODING: utf-8
+        PYTHONUTF8: 1
       run: |
+        chcp 65001
+        set PYTHONIOENCODING=utf-8
         pyinstaller awake.spec --distpath dist --workpath build --clean
 
     - name: 重命名可执行文件
