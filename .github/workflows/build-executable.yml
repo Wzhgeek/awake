@@ -81,25 +81,19 @@ jobs:
         ls -la
         find . -name "awake-*" -type f
       
-    - name: 创建标签（仅当从main分支触发时）
-      if: github.ref == 'refs/heads/main'
+    - name: 设置版本号
       run: |
-        # 获取当前时间戳作为版本号
-        TIMESTAMP=$(date +"%Y%m%d.%H%M%S")
-        VERSION="v1.0.${TIMESTAMP}"
+        if [[ "${{ github.ref }}" == refs/tags/v* ]]; then
+          # 从标签获取版本号
+          VERSION="${GITHUB_REF#refs/tags/}"
+          echo "使用标签版本: $VERSION"
+        else
+          # 从main分支触发时，使用时间戳版本号（不创建标签）
+          TIMESTAMP=$(date +"%Y%m%d.%H%M%S")
+          VERSION="v1.0.${TIMESTAMP}"
+          echo "使用时间戳版本: $VERSION"
+        fi
         echo "VERSION=$VERSION" >> $GITHUB_ENV
-        echo "创建标签: $VERSION"
-        git config --local user.email "action@github.com"
-        git config --local user.name "GitHub Action"
-        git tag $VERSION
-        git push origin $VERSION
-      
-    - name: 设置版本号（从标签触发时）
-      if: startsWith(github.ref, 'refs/tags/v')
-      run: |
-        VERSION="${GITHUB_REF#refs/tags/}"
-        echo "VERSION=$VERSION" >> $GITHUB_ENV
-        echo "使用标签版本: $VERSION"
       
     - name: 创建发布
       uses: softprops/action-gh-release@v1
