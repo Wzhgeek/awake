@@ -70,6 +70,8 @@ jobs:
     steps:
     - name: 检出代码
       uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
       
     - name: 下载所有构建产物
       uses: actions/download-artifact@v4
@@ -79,17 +81,38 @@ jobs:
         ls -la
         find . -name "awake-*" -type f
       
+    - name: 创建标签（仅当从main分支触发时）
+      if: github.ref == 'refs/heads/main'
+      run: |
+        # 获取当前时间戳作为版本号
+        TIMESTAMP=$(date +"%Y%m%d.%H%M%S")
+        VERSION="v1.0.${TIMESTAMP}"
+        echo "VERSION=$VERSION" >> $GITHUB_ENV
+        echo "创建标签: $VERSION"
+        git config --local user.email "action@github.com"
+        git config --local user.name "GitHub Action"
+        git tag $VERSION
+        git push origin $VERSION
+      
+    - name: 设置版本号（从标签触发时）
+      if: startsWith(github.ref, 'refs/tags/v')
+      run: |
+        VERSION="${GITHUB_REF#refs/tags/}"
+        echo "VERSION=$VERSION" >> $GITHUB_ENV
+        echo "使用标签版本: $VERSION"
+      
     - name: 创建发布
       uses: softprops/action-gh-release@v1
       with:
+        tag_name: ${{ env.VERSION }}
         files: |
           awake-windows.exe/awake-windows.exe
         draft: false
         prerelease: false
         generate_release_notes: true
-        name: "离线唤醒词检测 ${{ github.ref_name }}"
+        name: "离线唤醒词检测 ${{ env.VERSION }}"
         body: |
-          ## 🎯 离线唤醒词检测系统 ${{ github.ref_name }}
+          ## 🎯 离线唤醒词检测系统 ${{ env.VERSION }}
           
           ### 📦 下载说明
           - **Windows用户**: 下载 `awake-windows.exe`
