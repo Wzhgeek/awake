@@ -17,9 +17,6 @@ jobs:
           - os: windows-latest
             artifact_name: awake-windows.exe
             executable_name: awake.exe
-          - os: ubuntu-latest
-            artifact_name: awake-linux
-            executable_name: awake
 
     steps:
     - name: 检出代码
@@ -40,12 +37,6 @@ jobs:
         restore-keys: |
           ${{ runner.os }}-pip-
 
-    - name: 安装系统依赖 (Ubuntu)
-      if: matrix.os == 'ubuntu-latest'
-      run: |
-        sudo apt-get update
-        sudo apt-get install -y portaudio19-dev python3-pyaudio libasound2-dev
-
     - name: 安装Python依赖
       run: |
         python -m pip install --upgrade pip
@@ -55,20 +46,9 @@ jobs:
       run: |
         pyinstaller awake.spec --distpath dist --workpath build --clean
 
-    - name: 重命名可执行文件 (Windows)
-      if: matrix.os == 'windows-latest'
+    - name: 重命名可执行文件
       run: |
         move dist\awake.exe dist\awake-windows.exe
-
-    - name: 重命名可执行文件 (Linux)
-      if: matrix.os == 'ubuntu-latest'
-      run: |
-        mv dist/awake dist/awake-linux
-
-    - name: 增加执行权限 (Linux)
-      if: matrix.os == 'ubuntu-latest'
-      run: |
-        chmod +x dist/awake-linux
 
     - name: 测试可执行文件
       run: |
@@ -103,7 +83,6 @@ jobs:
       with:
         files: |
           awake-windows.exe/awake-windows.exe
-          awake-linux/awake-linux
         draft: false
         prerelease: false
         generate_release_notes: true
@@ -113,11 +92,10 @@ jobs:
           
           ### 📦 下载说明
           - **Windows用户**: 下载 `awake-windows.exe`
-          - **Linux用户**: 下载 `awake-linux` (需要添加执行权限: `chmod +x awake-linux`)
           
           ### 🚀 使用方法
-          1. 下载对应平台的可执行文件
-          2. 双击运行程序（Windows）或在终端中运行（Linux）
+          1. 下载可执行文件
+          2. 双击运行程序
           3. 对着麦克风说出"迈灵迈灵"进行唤醒测试
           4. 程序会输出JSON格式的唤醒状态: `{"awake": true}`
           
@@ -130,7 +108,7 @@ jobs:
           - ⚙️ 基于Porcupine引擎的离线语音识别
           - 🗣️ 支持中文唤醒词"迈灵迈灵"
           - 🌐 无需网络连接，完全离线运行
-          - 💻 跨平台支持：Windows、Linux
+          - 💻 支持Windows平台
           - ⚡ 低延迟，实时响应
           
           ### 🚨 注意事项
