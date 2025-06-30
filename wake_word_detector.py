@@ -62,7 +62,7 @@ class WakeWordDetector:
         self.pa = None
         
         # Porcupine访问密钥
-        self.access_key = 'SvijjCX/afSPA0vXc2gd2LfkdthWcOy1N+FS/qB52gj2evS0rEuHvw=='
+        self.access_key = 'YFQbRTufWcMpXnZ2vpiIQFjnG2Ul3vCntVxambYszRDFh2mmjCH0ZQ=='
         
         # 自动检测可用的关键词模型文件
         possible_model_names = [
