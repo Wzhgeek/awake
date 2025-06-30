@@ -253,23 +253,6 @@ def main():
     # 创建检测器实例
     detector = WakeWordDetector()
     
-    # 检查访问密钥
-    if detector.access_key == "YOUR_ACCESS_KEY_HERE":
-        safe_print("⚠️  警告: 请设置您的Porcupine访问密钥!")
-        safe_print("📝 步骤:")
-        safe_print("   1. 访问 https://console.picovoice.ai/")
-        safe_print("   2. 注册账户并获取免费访问密钥")
-        safe_print("   3. 在代码中替换 'YOUR_ACCESS_KEY_HERE'")
-        safe_print("💡 您也可以通过环境变量设置: export PORCUPINE_ACCESS_KEY=your_key")
-        
-        # 尝试从环境变量获取
-        env_key = os.getenv('PORCUPINE_ACCESS_KEY')
-        if env_key:
-            detector.access_key = env_key
-            safe_print("✅ 从环境变量获取到访问密钥")
-        else:
-            return False
-    
     # 启动检测
     return detector.start()
 
