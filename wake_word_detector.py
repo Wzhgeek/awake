@@ -63,12 +63,12 @@ class WakeWordDetector:
         
         # Porcupine访问密钥 - 您需要从Picovoice官网获取免费的访问密钥
         # 请访问 https://console.picovoice.ai/ 注册并获取访问密钥
-        self.access_key = "umxBFGL4+LwwwydBgShOv9d9sY2jlk3YQlrjS93wVkMjXbyU8G/XMw=="  # 请替换为您的实际访问密钥
+        self.access_key = "SvijjCX/afSPA0vXc2gd2LfkdthWcOy1N+FS/qB52gj2evS0rEuHvw=="  # 请替换为您的实际访问密钥
         
         # 自动检测可用的关键词模型文件
         possible_model_names = [
             "迈灵迈灵_zh_windows_v3_0_0.ppn",  # Windows版本
-            "迈灵迈灵_zh_linux_v3_0_0.ppn",    # Linux版本
+            # "迈灵迈灵_zh_linux_v3_0_0.ppn",    # Linux版本
             "迈灵迈灵_zh_mac_v3_0_0.ppn",      # Mac版本
         ]
         
