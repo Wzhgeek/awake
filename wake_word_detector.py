@@ -62,13 +62,7 @@ class WakeWordDetector:
         self.pa = None
         
         # Porcupine访问密钥 - 从环境变量或默认值获取
-        self.access_key = os.getenv('PORCUPINE_ACCESS_KEY', 'SvijjCX/afSPA0vXc2gd2LfkdthWcOy1N+FS/qB52gj2evS0rEuHvw==')
-        if not self.access_key or self.access_key == 'YOUR_ACCESS_KEY_HERE':
-            safe_print("⚠️  警告: 未设置有效的Porcupine访问密钥!")
-            safe_print("📝 您可以通过以下方式设置访问密钥:")
-            safe_print("   1. 设置环境变量: PORCUPINE_ACCESS_KEY=your_key")
-            safe_print("   2. 在代码中直接设置 self.access_key")
-            safe_print("   3. 访问 https://console.picovoice.ai/ 获取访问密钥")
+        self.access_key = 'SvijjCX/afSPA0vXc2gd2LfkdthWcOy1N+FS/qB52gj2evS0rEuHvw=='
         
         # 自动检测可用的关键词模型文件
         possible_model_names = [
