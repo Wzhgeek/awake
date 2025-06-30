@@ -1,0 +1,141 @@
+name: 构建可执行文件
+
+on:
+  push:
+    branches: [ main ]
+    tags: [ 'v*' ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        include:
+          - os: windows-latest
+            artifact_name: awake-windows.exe
+            executable_name: awake.exe
+          - os: ubuntu-latest
+            artifact_name: awake-linux
+            executable_name: awake
+          - os: macos-latest
+            artifact_name: awake-macos
+            executable_name: awake
+
+    steps:
+    - name: 检出代码
+      uses: actions/checkout@v4
+
+    - name: 设置Python环境
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.9'
+
+    - name: 安装系统依赖 (Ubuntu)
+      if: matrix.os == 'ubuntu-latest'
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y portaudio19-dev python3-pyaudio libasound2-dev
+
+    - name: 安装系统依赖 (macOS)
+      if: matrix.os == 'macos-latest'
+      run: |
+        brew install portaudio
+
+    - name: 安装Python依赖
+      run: |
+        python -m pip install --upgrade pip
+        pip install -r requirements.txt
+
+    - name: 构建可执行文件
+      run: |
+        pyinstaller awake.spec --distpath dist --workpath build --clean
+
+    - name: 重命名可执行文件 (Windows)
+      if: matrix.os == 'windows-latest'
+      run: |
+        move dist\awake.exe dist\awake-windows.exe
+
+    - name: 重命名可执行文件 (Linux)
+      if: matrix.os == 'ubuntu-latest'
+      run: |
+        mv dist/awake dist/awake-linux
+
+    - name: 重命名可执行文件 (macOS)
+      if: matrix.os == 'macos-latest'
+      run: |
+        mv dist/awake dist/awake-macos
+
+    - name: 测试可执行文件
+      run: |
+        ls -la dist/
+
+    - name: 上传构建产物
+      uses: actions/upload-artifact@v3
+      with:
+        name: ${{ matrix.artifact_name }}
+        path: dist/${{ matrix.artifact_name }}
+        retention-days: 30
+
+  release:
+    needs: build
+    runs-on: ubuntu-latest
+    if: startsWith(github.ref, 'refs/tags/v')
+    
+    steps:
+    - name: 检出代码
+      uses: actions/checkout@v4
+      
+    - name: 下载所有构建产物
+      uses: actions/download-artifact@v3
+      
+    - name: 列出下载的文件
+      run: |
+        ls -la
+        find . -name "awake-*" -type f
+      
+    - name: 创建发布
+      uses: softprops/action-gh-release@v1
+      with:
+        files: |
+          awake-windows.exe/awake-windows.exe
+          awake-linux/awake-linux
+          awake-macos/awake-macos
+        draft: false
+        prerelease: false
+        generate_release_notes: true
+        name: "离线唤醒词检测 ${{ github.ref_name }}"
+        body: |
+          ## 🎯 离线唤醒词检测系统 ${{ github.ref_name }}
+          
+          ### 📦 下载说明
+          - **Windows用户**: 下载 `awake-windows.exe`
+          - **Linux用户**: 下载 `awake-linux` (需要添加执行权限: `chmod +x awake-linux`)
+          - **macOS用户**: 下载 `awake-macos` (需要添加执行权限: `chmod +x awake-macos`)
+          
+          ### 🚀 使用方法
+          1. 下载对应平台的可执行文件
+          2. 双击运行程序（Windows）或在终端中运行（Linux/macOS）
+          3. 对着麦克风说出"迈灵迈灵"进行唤醒测试
+          4. 程序会输出JSON格式的唤醒状态: `{"awake": true}`
+          
+          ### ⚙️ 运行要求
+          - 需要麦克风权限
+          - 确保音频设备正常工作
+          - 建议在安静环境下使用以提高识别准确率
+          
+          ### 🔧 技术特性
+          - �� 基于Porcupine引擎的离线语音识别
+          - 🗣️ 支持中文唤醒词"迈灵迈灵"
+          - 🌐 无需网络连接，完全离线运行
+          - 💻 跨平台支持：Windows、Linux、macOS
+          - ⚡ 低延迟，实时响应
+          
+          ### 🚨 注意事项
+          - 首次运行可能需要授予麦克风访问权限
+          - macOS用户可能需要在"安全性与隐私"中允许运行
+          - 使用Ctrl+C可以安全退出程序
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }} 
