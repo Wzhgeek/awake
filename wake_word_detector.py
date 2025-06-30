@@ -65,11 +65,29 @@ class WakeWordDetector:
         # 请访问 https://console.picovoice.ai/ 注册并获取访问密钥
         self.access_key = "umxBFGL4+LwwwydBgShOv9d9sY2jlk3YQlrjS93wVkMjXbyU8G/XMw=="  # 请替换为您的实际访问密钥
         
+        # 自动检测可用的关键词模型文件
+        possible_model_names = [
+            "迈灵迈灵_zh_windows_v3_0_0.ppn",  # Windows版本
+            "迈灵迈灵_zh_linux_v3_0_0.ppn",    # Linux版本
+            "迈灵迈灵_zh_mac_v3_0_0.ppn",      # Mac版本
+        ]
+        
+        model_path = None
+        for model_name in possible_model_names:
+            path = resource_path(model_name)
+            if os.path.exists(path):
+                model_path = path
+                break
+        
+        if not model_path:
+            # 如果没有找到任何模型文件，使用默认的
+            model_path = resource_path("迈灵迈灵_zh_linux_v3_0_0.ppn")
+        
         # 自定义关键词模型配置
         self.keywords_config = [
             {
                 "name": "迈灵迈灵",
-                "model_path": resource_path("迈灵迈灵_zh_linux_v3_0_0.ppn"),
+                "model_path": model_path,
                 "action": "wake_up"
             }
         ]

@@ -14,12 +14,22 @@ porcupine_datas = collect_data_files('pvporcupine')
 datas = []
 datas.extend(porcupine_datas)
 
-# 添加项目的模型文件
+# 添加中文语言模型（必需）
 if os.path.exists('porcupine_params_zh.pv'):
     datas.append(('porcupine_params_zh.pv', '.'))
+    print("添加中文语言模型: porcupine_params_zh.pv")
 
-if os.path.exists('迈灵迈灵_zh_linux_v3_0_0.ppn'):
-    datas.append(('迈灵迈灵_zh_linux_v3_0_0.ppn', '.'))
+# 唤醒词模型文件（检查所有可能的平台版本）
+model_files = [
+    '迈灵迈灵_zh_windows_v3_0_0.ppn',  # Windows版本
+    '迈灵迈灵_zh_linux_v3_0_0.ppn',    # Linux版本
+    '迈灵迈灵_zh_mac_v3_0_0.ppn',      # Mac版本
+]
+
+for model_file in model_files:
+    if os.path.exists(model_file):
+        datas.append((model_file, '.'))
+        print(f"添加模型文件: {model_file}")
 
 block_cipher = None
 
